@@ -15,12 +15,15 @@ from datetime import datetime, timedelta, date
 
 yesterday = date.today() - timedelta(days=1)
 
+# These links are of each cities results sorted by date posted decending
 brentwood_rei_url = 'https://rei.jobs/careers/SearchJobs/?3_73_3=37158&jobSort=postedDate&jobSortDirection=DESC&'
 lebanon_rei_url = 'https://rei.jobs/careers/SearchJobs/?3_73_3=5813561&jobSort=postedDate&jobSortDirection=DESC&'
 chattanooga_rei_url = 'https://rei.jobs/careers/SearchJobs/?3_73_3=2217122&jobSort=postedDate&jobSortDirection=DESC&'
 
 
 def get_job_titles(url, dict_to_append):
+    """This function takes a job search url and an empty dict and appends the url of each job as the key
+    and a list of job title and date posted as the values"""
     r = requests.get(url)
     soup = BeautifulSoup(r.text, 'html.parser')
     joblist = soup.find('ul', class_='jobList')
@@ -36,15 +39,19 @@ def get_job_titles(url, dict_to_append):
         dict_to_append.update({link: [title, date_obj]})
 
 
+# Initialize dict
 job_dict = {}
 
+# Use function to fill dict with each city of interest
 get_job_titles(brentwood_rei_url, job_dict)
 get_job_titles(lebanon_rei_url, job_dict)
 get_job_titles(chattanooga_rei_url, job_dict)
 
 
+# Initialize empty string to eventually become email message
 new_jobs_str = ''
 
+# Look for jobs posted yesterday, add them to the email message
 for (k, v) in job_dict.items():
     if v[1] > yesterday:
         new_jobs_str += f'{str(v[0])}\n{k}\n\n'
@@ -52,6 +59,7 @@ for (k, v) in job_dict.items():
         pass
 
 
+# If the email message has new jobs send the email to receiver
 if len(new_jobs_str) == 0:
     print('No new jobs')
 else:
